@@ -15,6 +15,7 @@ app.get("/", (req, res) => {
     res.json({Name: "tej", job: "software developer"});
 })
 
+app.use("/api/v1/admin/configuration", require('./routes/configuration'))
 app.use("/api/v1/admin", require('./routes/master'))
 app.use("/api/v1/admin", require('./routes/product'))
 
