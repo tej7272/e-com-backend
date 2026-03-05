@@ -1,15 +1,16 @@
 
 const asyncHandler = require('express-async-handler');
 const Category = require('../../models/configuration/category');
+const Product = require('../../models/productModel');
 
 const getCategories = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10 } = req.query;
+    // const { page = 1, limit = 10 } = req.query;
     const categories = await Category.find()
         .lean()
-        .skip((page - 1) * limit)
-        .limit(Number(limit));
+        // .skip((page - 1) * limit)
+        // .limit(Number(limit));
     const total = await Category.countDocuments();
-    res.status(200).json({ status: true, data: categories, total, page: Number(page) });
+    res.status(200).json({ status: true, data: categories, total });
 });
 
 const addCategory = asyncHandler(async (req, res) => {
