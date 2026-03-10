@@ -13,7 +13,7 @@ const getCategories = asyncHandler(async (req, res) => {
     res.status(200).json({ status: true, data: categories, total });
 });
 
-const addCategory = asyncHandler(async (req, res) => {
+const createCategory = asyncHandler(async (req, res) => {
 
     const name = req.body.name
     const exists = await Category.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
@@ -70,4 +70,4 @@ const deleteCategory = asyncHandler(async (req, res) => {
     res.status(200).json({ status: true, message: "Category deleted successfully" });
 });
 
-module.exports = { getCategories, addCategory, updateCategory, deleteCategory };
+module.exports = { getCategories, createCategory, updateCategory, deleteCategory };
