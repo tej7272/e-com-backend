@@ -2,7 +2,7 @@
 const z = require('zod')
 
 const categorySchema = z.object({
-    name:        z.string().trim().min(5, "Category name must be at least 5 characters").max(25),
+    name:        z.string().trim().min(4, "Category name must be at least 5 characters").max(25),
     description: z.string().trim().max(500).optional(),
     isActive:    z.boolean().optional().default(true),
 });
