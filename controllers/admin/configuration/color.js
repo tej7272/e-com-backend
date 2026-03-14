@@ -1,7 +1,7 @@
 
 const asyncHandler = require('express-async-handler');
-const Color = require('../../models/configuration/color');
-const Product = require('../../models/productModel');
+const Color = require('../../../models/configuration/color');
+const Product = require('../../../models/productModel');
 
 const getColors = asyncHandler(async (req, res) => {
     // const { page = 1, limit = 10 } = req.query;

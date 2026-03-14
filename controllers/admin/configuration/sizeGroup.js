@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const SizeGroup = require('../../models/configuration/sizeGroup');
-const Product = require('../../models/productModel');
+const SizeGroup = require('../../../models/configuration/sizeGroup');
+const Product = require('../../../models/productModel');
 
 
 const getSizeGroups = asyncHandler( async (req, res) => {

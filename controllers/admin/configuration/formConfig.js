@@ -1,10 +1,10 @@
 const asyncHandler = require('express-async-handler');
 
-const Category = require('../../models/configuration/category');
-const SizeGroup = require('../../models/configuration/sizeGroup');
-const Brand = require("../../models/configuration/brand");
-const SubCategory = require("../../models/configuration/subCategory");
-const Color = require("../../models/configuration/color");
+const Category = require('../../../models/configuration/category');
+const SizeGroup = require('../../../models/configuration/sizeGroup');
+const Brand = require("../../../models/configuration/brand");
+const SubCategory = require("../../../models/configuration/subCategory");
+const Color = require("../../../models/configuration/color");
 const {
     GENDER,
     ORDER_STATUS,
@@ -14,7 +14,7 @@ const {
     TICKET_PRIORITY,
     INVOICE_STATUS,
     PRODUCT_STATUS,
-} = require('../../constant/appConstants');
+} = require('../../../constant/appConstants');
 
 
 const getFormConfig = asyncHandler( async (req, res) => {

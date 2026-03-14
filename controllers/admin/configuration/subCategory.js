@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 
-const SubCategory = require('../../models/configuration/subCategory');
+const SubCategory = require('../../../models/configuration/subCategory');
 
 const getSubcategories = asyncHandler( async (req, res) => {
     const subCategory = await SubCategory.find().populate('category',  'name').populate('sizeGroup', 'name sizes').lean();

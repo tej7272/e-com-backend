@@ -1,7 +1,7 @@
 
 const asyncHandler = require('express-async-handler');
-const Brand = require('../../models/configuration/brand');
-const Product = require('../../models/productModel');
+const Brand = require('../../../models/configuration/brand');
+const Product = require('../../../models/productModel');
 
 const getBrands = asyncHandler(async (req, res) => {
     // const { page = 1, limit = 10 } = req.query;
