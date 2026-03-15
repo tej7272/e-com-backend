@@ -37,7 +37,7 @@ const getFormConfig = asyncHandler( async (req, res) => {
     ])
 
     res.status(200).json({
-        status: true, 
+        success: true, 
         data: {
             categories, 
             sizeGroups, 

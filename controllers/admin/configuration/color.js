@@ -1,73 +1,111 @@
+const asyncHandler = require('express-async-handler')
+const Color        = require('../../../models/configuration/color')
+const Product      = require('../../../models/productModel')
 
-const asyncHandler = require('express-async-handler');
-const Color = require('../../../models/configuration/color');
-const Product = require('../../../models/productModel');
 
+// ─── Get Colors ───────────────────────────────────────────────
 const getColors = asyncHandler(async (req, res) => {
-    // const { page = 1, limit = 10 } = req.query;
-    const colors = await Color.find()
-        .lean()
-        // .skip((page - 1) * limit)
-        // .limit(Number(limit));
-    const total = await Color.countDocuments();
-    res.status(200).json({ status: true, data: colors, total });
-});
+  const { page = 1, limit = 10 } = req.query
 
+  const [colors, total] = await Promise.all([
+    Color.find()
+      .lean()
+      .skip((page - 1) * limit)
+      .limit(Number(limit)),
+    Color.countDocuments()
+  ])
+
+  res.status(200).json({
+    success: true,
+    data:    colors,
+    total,
+    page:    Number(page),
+    pages:   Math.ceil(total / limit),
+  })
+})
+
+
+// ─── Create Color ─────────────────────────────────────────────
 const createColor = asyncHandler(async (req, res) => {
+  const { name } = req.body
 
-    const name = req.body.name
-    const exists = await Color.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
-    if (exists) {
-        res.status(409);
-        throw new Error("Color with this name already exists");
-    }
+  const exists = await Color.findOne({
+    name: { $regex: new RegExp(`^${name}$`, 'i') }
+  })
+  if (exists) {
+    res.status(409)
+    throw new Error('Color with this name already exists')
+  }
 
-    const color = await Color.create(req.body);
-    res.status(201).json({ status: true, message: "Color created successfully", data: color });
-});
+  const color = await Color.create(req.body)
+
+  res.status(201).json({
+    success: true,
+    message: 'Color created successfully',
+    data:    color,
+  })
+})
 
 
-
+// ─── Update Color ─────────────────────────────────────────────
 const updateColor = asyncHandler(async (req, res) => {
+  const { name } = req.body
 
-    const name = req.body.name;
-    const duplicate = await Color.findOne({
-        name: { $regex: new RegExp(`^${name}$`, 'i') },
-        _id: { $ne: req.params.id } 
-    });
-    if (duplicate) {
-        res.status(409);
-        throw new Error("Color with this name already exists");
-    }
+  // ✅ check exists first
+  const color = await Color.findById(req.params.id)
+  if (!color) {
+    res.status(404)
+    throw new Error('Color not found')   // ✅ was "Brand not found" — copy paste bug
+  }
 
-    const updated = await Color.findByIdAndUpdate(
-        req.params.id,
-        { $set: req.body },
-        { new: true, runValidators: true }
-    ).lean();
-    if (!updated) {
-        res.status(404);
-        throw new Error("Brand not found");
-    }
+  // ✅ then check duplicate
+  const duplicate = await Color.findOne({
+    name: { $regex: new RegExp(`^${name}$`, 'i') },
+    _id:  { $ne: req.params.id }
+  })
+  if (duplicate) {
+    res.status(409)
+    throw new Error('Color with this name already exists')
+  }
 
-    res.status(200).json({ status: true, message: "Brand updated successfully", data: updated });
-});
+  const updated = await Color.findByIdAndUpdate(
+    req.params.id,
+    { $set: req.body },
+    { new: true, runValidators: true }
+  ).lean()
+
+  res.status(200).json({
+    success: true,
+    message: 'Color updated successfully',  // ✅ was "Brand updated" — copy paste bug
+    data:    updated,
+  })
+})
 
 
+// ─── Delete Color ─────────────────────────────────────────────
 const deleteColor = asyncHandler(async (req, res) => {
 
-    const inUse = await Product.findOne({ brand: req.params.id });
-    if (inUse) {
-        res.status(400);
-        throw new Error("Color is in use and cannot be deleted");
-    }
+  // ✅ check exists first
+  const color = await Color.findById(req.params.id)
+  if (!color) {
+    res.status(404)
+    throw new Error('Color not found')
+  }
 
-    const deleted = await Color.findByIdAndDelete(req.params.id);
-    if(!deleted){
-        res.status(404);
-        throw new Error("Color not found");
-    }
-    res.status(200).json({ status: true, message: "Color deleted successfully" });
-});
+  // ✅ check in use by color not brand
+  const inUse = await Product.findOne({ color: req.params.id })  // ✅ was brand — copy paste bug
+  if (inUse) {
+    res.status(400)
+    throw new Error('Color is in use and cannot be deleted')
+  }
 
-module.exports = { getColors, createColor, updateColor, deleteColor };
+  await Color.findByIdAndDelete(req.params.id)
+
+  res.status(200).json({
+    success: true,
+    message: 'Color deleted successfully',
+  })
+})
+
+
+module.exports = { getColors, createColor, updateColor, deleteColor }

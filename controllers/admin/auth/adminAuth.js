@@ -1,10 +1,10 @@
 // controllers/auth/adminAuth.controller.js
 
-const asyncHandler  = require('express-async-handler')
-const Admin         = require('../../../models/auth/adminAuth')
+const asyncHandler = require('express-async-handler')
+const Admin = require('../../../models/auth/adminAuth')
 const generateToken = require('../../../utils/generateToken')
-const sendEmail     = require('../../../utils/sendEmail')
-const crypto        = require('crypto')
+const sendEmail = require('../../../utils/sendEmail')
+const crypto = require('crypto')
 
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 
@@ -17,19 +17,16 @@ const login = asyncHandler(async (req, res) => {
     .findOne({ email })
     .select('+password +otp +otpExpiry')
 
-  // ✅ 401 — unauthorized, wrong credentials
   if (!admin) {
     res.status(401)
     throw new Error('Invalid email or password')
   }
 
-  // ✅ 403 — forbidden, account disabled
   if (!admin.isActive) {
     res.status(403)
     throw new Error('Account is disabled')
   }
 
-  // ✅ 423 — locked, too many attempts
   if (admin.isLocked()) {
     res.status(423)
     throw new Error('Account locked. Try again in 30 minutes')
@@ -71,9 +68,10 @@ const validateOtp = asyncHandler(async (req, res) => {
     .findOne({ email })
     .select('+otp +otpExpiry')
 
+  // ✅ 401 — don't reveal if admin exists
   if (!admin) {
-    res.status(404)
-    throw new Error('Admin not found')
+    res.status(401)
+    throw new Error('Invalid credentials')
   }
 
   if (!admin.otp || !admin.otpExpiry) {
@@ -98,7 +96,7 @@ const validateOtp = asyncHandler(async (req, res) => {
   const token = generateToken({ id: admin._id, role: admin.role })
 
   res.status(200).json({
-    status: true,
+    success: true,
     message: 'Login successful',
     token,
     admin: {
@@ -178,4 +176,19 @@ const resetPassword = asyncHandler(async (req, res) => {
 })
 
 
-module.exports = { login, validateOtp, forgotPassword, resetPassword } 
+// ─── Get Admin Info ───────────────────────────────────────────
+const getAdminInfo = asyncHandler(async (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Admin info fetched',
+    admin: {
+      id:    req.admin._id,
+      name:  req.admin.name,
+      email: req.admin.email,
+      role:  req.admin.role,
+    }
+  })
+})
+
+
+module.exports = { login, validateOtp, forgotPassword, resetPassword, getAdminInfo }

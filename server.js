@@ -12,6 +12,7 @@ const corsOptions = {
     origin: [
         'http://localhost:3000',              
         'https://b-nexora.vercel.app',
+        'http://192.168.1.15:3000'
     ],
     methods:          ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders:   ['Content-Type', 'Authorization'],
@@ -20,8 +21,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,7 +29,6 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/v1", require('./routes/index'))
-// app.use("/api/v1/admin/configuration", require('./routes/admin/configuration'))
 
 
 app.use((req, res, next) => {
