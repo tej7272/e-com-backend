@@ -8,8 +8,19 @@ dbConnect();
 const app = express();
 const port = process.env.PORT || 8080;
 
+const corsOptions = {
+    origin: [
+        'http://localhost:3000',              
+        'https://b-nexora.vercel.app',
+        'http://192.168.1.15:3000'
+    ],
+    methods:          ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders:   ['Content-Type', 'Authorization'],
+    credentials:      true,
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -17,9 +28,7 @@ app.get("/", (req, res) => {
     res.json({Name: "tej", job: "software developer"});
 })
 
-app.use("/api/v1/admin", require('./routes/formConfig'))
-app.use("/api/v1/admin/configuration", require('./routes/configuration'))
-app.use("/api/v1/admin", require('./routes/product'))
+app.use("/api/v1", require('./routes/index'))
 
 
 app.use((req, res, next) => {

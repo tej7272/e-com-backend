@@ -1,7 +1,7 @@
 const express = require('express');
 const { 
    getFormConfig
-} = require('../controllers/configuration/formConfig');
+} = require('../controllers/admin/configuration/formConfig');
 
 const router = express.Router();
 
