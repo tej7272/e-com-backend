@@ -3,13 +3,12 @@
 const asyncHandler = require('express-async-handler')
 const Admin = require('../../../models/auth/adminAuth')
 const generateToken = require('../../../utils/generateToken')
-const sendEmail = require('../../../utils/sendEmail')
+// const sendEmail = require('../../../utils/sendEmailResend')
 const crypto = require('crypto')
+const sendEmail = require('../../../utils/sendEmail')
 
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 
-
-// ─── Login ────────────────────────────────────────────────────
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body
 
@@ -41,8 +40,8 @@ const login = asyncHandler(async (req, res) => {
 
   await admin.resetFailedAttempts()
 
-  const otp       = generateOtp()
-  admin.otp       = otp
+  const otp= generateOtp()
+  admin.otp = otp
   admin.otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
   await admin.save()
 
@@ -68,7 +67,6 @@ const validateOtp = asyncHandler(async (req, res) => {
     .findOne({ email })
     .select('+otp +otpExpiry')
 
-  // ✅ 401 — don't reveal if admin exists
   if (!admin) {
     res.status(401)
     throw new Error('Invalid credentials')
