@@ -45,6 +45,8 @@ const login = asyncHandler(async (req, res) => {
   admin.otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
   await admin.save()
 
+  console.log("send mail");
+
   await sendEmail({
     to:      admin.email,
     subject: 'Your login OTP',
