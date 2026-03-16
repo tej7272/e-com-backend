@@ -3,9 +3,9 @@
 const asyncHandler = require('express-async-handler')
 const Admin = require('../../../models/auth/adminAuth')
 const generateToken = require('../../../utils/generateToken')
-// const sendEmail = require('../../../utils/sendEmailResend')
-const crypto = require('crypto')
 const sendEmail = require('../../../utils/sendEmail')
+const crypto = require('crypto')
+// const sendEmail = require('../../../utils/sendEmailSMPT')
 
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 
