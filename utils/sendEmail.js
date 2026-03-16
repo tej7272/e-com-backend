@@ -1,18 +1,25 @@
-// utils/sendEmail.js
-const { Resend } = require('resend')
+const nodemailer = require('nodemailer')
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+})
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    await resend.emails.send({
-      from:    'MyApp <onboarding@resend.dev>',
+    const result = await transporter.sendMail({
+      from:    `"B-nexora" <${process.env.SMTP_USER}>`,
       to,
       subject,
       html,
     })
+    console.log('Email sent:', result.messageId)
+    return result
   } catch (error) {
-    console.error('Email failed:', error.message)
+    console.error('Email error:', error.message)
     throw error
   }
 }
