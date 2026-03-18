@@ -1,14 +1,18 @@
-// controllers/auth/adminAuth.controller.js
-
-const asyncHandler = require('express-async-handler')
-const Admin = require('../../../models/auth/adminAuth')
-const generateToken = require('../../../utils/generateToken')
-const sendEmail = require('../../../utils/sendEmail')
-const crypto = require('crypto')
-// const sendEmail = require('../../../utils/sendEmailSMPT')
+const asyncHandler  = require('express-async-handler')
+const crypto        = require('crypto')
+const Admin         = require('../../../models/auth/adminAuth')
+const sendEmail     = require('../../../utils/sendEmail')
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  setTokenCookies,
+  clearTokenCookies,
+} = require('../../../utils/generateToken')
 
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 
+
+// ─── Login ────────────────────────────────────────────────────
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body
 
@@ -40,12 +44,11 @@ const login = asyncHandler(async (req, res) => {
 
   await admin.resetFailedAttempts()
 
-  const otp= generateOtp()
-  admin.otp = otp
-  admin.otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+  // generate and save OTP for 2FA
+  const otp          = generateOtp()
+  admin.otp          = otp
+  admin.otpExpiry    = new Date(Date.now() + 5 * 60 * 1000)
   await admin.save()
-
-  console.log("send mail");
 
   await sendEmail({
     to:      admin.email,
@@ -89,16 +92,21 @@ const validateOtp = asyncHandler(async (req, res) => {
     throw new Error('Invalid OTP')
   }
 
+  // clear OTP after successful validation
   admin.otp       = null
   admin.otpExpiry = null
   await admin.save()
 
-  const token = generateToken({ id: admin._id, role: admin.role })
+  // issue both tokens
+  const accessToken  = generateAccessToken({ id: admin._id, role: admin.role })
+  const refreshToken = generateRefreshToken({ id: admin._id })
+
+  setTokenCookies(res, refreshToken)
 
   res.status(200).json({
     success: true,
     message: 'Login successful',
-    token,
+    accessToken,
     admin: {
       id:    admin._id,
       name:  admin.name,
@@ -109,13 +117,56 @@ const validateOtp = asyncHandler(async (req, res) => {
 })
 
 
+// ─── Refresh Token ────────────────────────────────────────────
+const refreshToken = asyncHandler(async (req, res) => {
+  const token = req.cookies.refreshToken
+
+  if (!token) {
+    res.status(401)
+    throw new Error('No refresh token')
+  }
+
+  let decoded
+  try {
+    const jwt = require('jsonwebtoken')
+    decoded   = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+  } catch (err) {
+    res.status(401)
+    throw new Error('Invalid or expired refresh token')
+  }
+
+  const admin = await Admin
+    .findById(decoded.id)
+    .select('isActive role')
+
+  if (!admin) {
+    res.status(401)
+    throw new Error('Admin no longer exists')
+  }
+
+  if (!admin.isActive) {
+    res.status(403)
+    throw new Error('Account is disabled')
+  }
+
+  // issue new access token only — refresh token stays the same
+  const newAccessToken = generateAccessToken({ id: admin._id, role: admin.role })
+
+  res.status(200).json({
+    success: true,
+    accessToken: newAccessToken,
+    message: 'Token refreshed',
+  })
+})
+
+
 // ─── Forgot Password ──────────────────────────────────────────
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body
 
   const admin = await Admin.findOne({ email })
 
-  // ✅ always same message — don't reveal if email exists
+  // always same message — don't reveal if email exists
   if (!admin) {
     return res.status(200).json({
       success: true,
@@ -191,4 +242,23 @@ const getAdminInfo = asyncHandler(async (req, res) => {
 })
 
 
-module.exports = { login, validateOtp, forgotPassword, resetPassword, getAdminInfo }
+// ─── Logout ───────────────────────────────────────────────────
+const logout = asyncHandler(async (req, res) => {
+  clearTokenCookies(res)  // clears both accessToken and refreshToken
+
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully'
+  })
+})
+
+
+module.exports = {
+  login,
+  validateOtp,
+  refreshToken,
+  forgotPassword,
+  resetPassword,
+  getAdminInfo,
+  logout,
+}

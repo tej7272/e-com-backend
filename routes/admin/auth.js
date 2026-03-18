@@ -1,19 +1,24 @@
-const express        = require('express')
-const { login, validateOtp, forgotPassword, resetPassword, getAdminInfo } = require('../../controllers/admin/auth/adminAuth')
-const { verifyToken }  = require('../../middlewares/verifyToken')
-// const { validate }     = require('../../middlewares/validate')
-const { loginSchema, otpSchema, forgotPasswordSchema, resetPasswordSchema } = require('../../validaters/admin/auth')
-const { validate } = require('../../middlewares/validationHandler')
+const router = require('express').Router()
+const { 
+    login,
+    logout,
+    validateOtp,
+    getAdminInfo,
+    refreshToken,
+    resetPassword,
+    forgotPassword,
+ } = require('../../controllers/admin/auth/adminAuth')
+const { verifyToken } = require('../../middlewares/verifyToken')
 
-const router = express.Router()
+// public routes
+router.post('/login', login)
+router.post('/logout', logout)
+router.post('/validate', validateOtp)
+router.post('/refresh', refreshToken)
+router.post('/forgot-password', forgotPassword)
+router.post('/reset-password', resetPassword)
 
-// ─── Public routes ────────────────────────────────────────────
-router.post('/login', validate(loginSchema), login)
-router.post('/validate', validate(otpSchema), validateOtp)
-router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword)
-router.post('/reset-password', validate(resetPasswordSchema), resetPassword)
-
-// ─── Protected routes ─────────────────────────────────────────
-router.get('/user-info', verifyToken, getAdminInfo)
+// protected routes
+router.get( '/user-info', verifyToken, getAdminInfo)
 
 module.exports = router

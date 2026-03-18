@@ -1,4 +1,3 @@
-// utils/sendEmail.js
 const { Resend } = require('resend')
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -6,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const sendEmail = async ({ to, subject, html }) => {
   try {
     await resend.emails.send({
-      from:    'MyApp <onboarding@resend.dev>',
+      from: "b-nexora <onboarding@resend.dev>",
       to,
       subject,
       html,
