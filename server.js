@@ -3,6 +3,7 @@ require('dotenv').config();
 const dbConnect = require('./config/db');
 const { errorHandler } = require('./middlewares/errorHandler')
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 dbConnect();
 const app = express();
@@ -17,8 +18,11 @@ const corsOptions = {
     methods:          ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders:   ['Content-Type', 'Authorization'],
     credentials:      true,
+    
 };
 
+
+app.use(cookieParser())
 app.use(cors(corsOptions));
 
 app.use(express.json());

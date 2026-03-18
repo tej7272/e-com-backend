@@ -1,4 +1,3 @@
-// ✅ wrap with try/catch since these are sync middlewares
 const validate = (schema) => (req, res, next) => {
   try {
     const result = schema.safeParse(req.body)
@@ -11,7 +10,7 @@ const validate = (schema) => (req, res, next) => {
     req.body = result.data
     next()
   } catch (err) {
-    next(err)  // ✅ pass to errorHandler
+    next(err) 
   }
 }
 
@@ -27,7 +26,7 @@ const validateQuery = (schema) => (req, res, next) => {
     req.query = result.data
     next()
   } catch (err) {
-    next(err)  // ✅ pass to errorHandler
+    next(err)
   }
 }
 
