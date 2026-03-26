@@ -6,6 +6,7 @@ const Brand = require("../../../models/configuration/brand");
 const SubCategory = require("../../../models/configuration/subCategory");
 const Color = require("../../../models/configuration/color");
 const {
+    TAGS,
     GENDER,
     ORDER_STATUS,
     PAYMENT_STATUS,
@@ -45,6 +46,7 @@ const getFormConfig = asyncHandler( async (req, res) => {
             subCategories,
             colors,
 
+            tags: TAGS,
             gender: GENDER,
             orderStatus: ORDER_STATUS,
             paymentStatus: PAYMENT_STATUS,
